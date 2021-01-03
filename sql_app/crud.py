@@ -24,6 +24,7 @@ def get_book_by_category(db: Session, category: str):
 # def get_read_books(db: Session, is_read: bool):
 #     return db.query(models.Book).filter
 
+
 def create_author(author_name: str):
     return models.Author(name = author_name)
 
