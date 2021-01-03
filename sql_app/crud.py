@@ -22,7 +22,7 @@ def get_book_by_category(db: Session, category: str):
     return db.query(models.Book).filter(models.Category.name == category).limit(10).all() # should return multiple books
 
 # def get_read_books(db: Session, is_read: bool):
-#     return db.query(models.Book).filter
+# return db.query(models.Book).filter
 
 
 def create_author(author_name: str):
