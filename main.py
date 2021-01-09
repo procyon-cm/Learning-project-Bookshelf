@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 import requests
 from sql_app import crud
-from sql_app import api_models
 
 from sql_app.crud import *
 from sql_app.models import *
@@ -45,7 +44,7 @@ def get_book_from_database(title: str, author: Optional[str] = None, category: O
 @app.post("/v1/books/internal")
 def create_book(book: schemas.BookCreate, db: Session = Depends(get_db)):     
     crud.create_book(db=db, book=book)
-
+    return "Book succesfully stored to database."
 
 @app.get("/v1/books/external")
 def get_book(key_words: str, subject: Optional[str] = None, author: Optional[str] = None):
