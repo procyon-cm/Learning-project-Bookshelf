@@ -64,10 +64,6 @@ def get_saved_books(db: Session, title: str, author: str, category: str):
 
 
 
-# def get_read_books(db: Session, is_read: bool):
-# return db.query(models.Book).filter
-
-
 def create_author(author_name: str):
     return models.Author(name = author_name)
 
@@ -108,7 +104,6 @@ def create_and_store_bookcategory(book_id: models.Book.id, category: models.Cate
     return bookcategory
 
 def create_and_store_industry_identifiers(book_id: models.Book.id, identifier_types, db: Session):
-    print(identifier_types)
     for identifier_type, tup in identifier_types.items():
         db_industry_identifier = models.IndustryIdentifier(name = tup[0], book_id = book_id, id = tup[1])
         db.add(db_industry_identifier)
@@ -136,7 +131,6 @@ def create_book(db: Session, book: schemas.BookCreate):
             else:
                 authors_in_db.append(author_in_db)
     foreign_id_dict["authors"] = authors
-    print(foreign_id_dict)
 
     if book.volumeInfo.categories is not None:
         stored_categories = list(map(lambda category: create_category(category), book.volumeInfo.categories))
@@ -149,7 +143,6 @@ def create_book(db: Session, book: schemas.BookCreate):
                 categories_in_db.append(category_in_db)
             
         foreign_id_dict["categories"] = categories
-    print(foreign_id_dict)
 
     if book.volumeInfo.publisher is not None:
         stored_publisher = create_publisher(book.volumeInfo.publisher)
@@ -182,19 +175,15 @@ def create_book(db: Session, book: schemas.BookCreate):
     if book.volumeInfo.industryIdentifiers is not None:
          
         stored_industry_identifiers = list(map(lambda industry_identifier: create_industry_identifier_with_type(industry_identifier), book.volumeInfo.industryIdentifiers))
-        print(stored_industry_identifiers)
         name_of_types = list(map(lambda industry_identifier: industry_identifier.type.name, stored_industry_identifiers))
-        print(name_of_types)
         industry_types_in_db = db.query(models.IdentifierType).filter(models.IdentifierType.name.in_(name_of_types)).all()
         stored_type_names = list(map(lambda stored_type: stored_type.name, industry_types_in_db))
         if industry_types_in_db is not None:
-            print(stored_type_names)
             db_industry_identifier_types_with_values = dict([(type.name, (type.id, None)) for type in industry_types_in_db])
             for identifier in book.volumeInfo.industryIdentifiers:
                 if identifier.type in db_industry_identifier_types_with_values:
                     db_industry_identifier_types_with_values[identifier.type] = (db_industry_identifier_types_with_values[identifier.type][0], identifier.identifier)
             stored_industry_identifiers = list(filter(lambda identifier_type: identifier_type.type.name not in stored_type_names, stored_industry_identifiers))
-        print(industry_types_in_db)
         foreign_id_dict["industry_identifiers"] = stored_industry_identifiers
 
 
@@ -215,7 +204,6 @@ def create_book(db: Session, book: schemas.BookCreate):
     new_book.update(foreign_id_dict)
 
     
-    print(new_book)
     db_book = models.Book(**new_book)
 
     for db_author in authors_in_db:

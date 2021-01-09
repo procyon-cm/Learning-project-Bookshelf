@@ -43,7 +43,6 @@ class Book(Base):
     averageRating = Column(Float)
     ratingsCount = Column(Integer)
     language_id = Column(Integer, ForeignKey("language.id"))
-    # is_read = Column(Boolean, default=False)
 
     authors = relationship("Author", secondary=book_author_table, back_populates="books")
     categories = relationship("Category", secondary=book_category_table, back_populates="books")
