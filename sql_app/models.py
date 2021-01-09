@@ -17,6 +17,19 @@ book_category_table = Table('book_category_table', Base.metadata,
     Column('category_id', Integer, ForeignKey('category.id'))
 )
 
+class BookAuthor(Base):
+    __tablename__ = "book_author_table"
+    __table_args__ = {'extend_existing': True}
+    
+    book_id = Column(Integer, ForeignKey('book.id'), primary_key=True)
+    author_id = Column(Integer, ForeignKey('author.id'), primary_key=True)
+
+class BookCategory(Base):
+    __tablename__ = "book_category_table"
+    __table_args__ = {'extend_existing': True}
+    
+    book_id = Column(Integer, ForeignKey('book.id'), primary_key=True)
+    category_id = Column(Integer, ForeignKey('category.id'), primary_key=True)    
 
 class Book(Base):
     __tablename__ = "book"
@@ -43,7 +56,7 @@ class Author(Base):
     __tablename__ = "author"
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False)
-    name = Column(String, unique=True)
+    name = Column(String)
     
     books = relationship("Book", secondary=book_author_table, back_populates="authors")
 
@@ -52,7 +65,7 @@ class Publisher(Base):
     __tablename__ = "publisher"
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False)
-    name = Column(String, unique=True)
+    name = Column(String)
 
     books = relationship("Book", back_populates="publisher")
 
@@ -60,7 +73,7 @@ class PrintType(Base):
     __tablename__ = "print_type"
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False)
-    name = Column(String, unique=True)
+    name = Column(String)
 
     books = relationship("Book", back_populates="print_type")
 
@@ -68,7 +81,7 @@ class Category(Base):
     __tablename__ = "category"
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False)
-    name = Column(String, unique=True)
+    name = Column(String)
 
     books = relationship("Book", secondary=book_category_table, back_populates="categories")
 
@@ -76,13 +89,13 @@ class Language(Base):
     __tablename__ = "language"
 
     id = Column(Integer, primary_key=True, unique=True, nullable=False)
-    name = Column(String, unique=True)
+    name = Column(String)
 
     books = relationship("Book", back_populates="language")
 
 class IndustryIdentifier(Base):
     __tablename__ = "industry_identifier"
-    id = Column(Integer, primary_key=True, unique=True, nullable=False)
+    id = Column(String, primary_key=True, unique=True, nullable=False)
     name = Column(String, ForeignKey("identifier_type.id"))
     book_id = Column(String, ForeignKey("book.id"))
     

@@ -4,12 +4,12 @@ from pydantic import BaseModel
 
 
 class IndustryIdentifiers(BaseModel):
-    type: Optional[str]
-    identifier: Optional[str]
+    type: str
+    identifier: str
 
 
 class VolumeInfo(BaseModel):
-    title: str
+    title: str 
     authors: List[str]
     publisher: Optional[str]
     publishedDate: Optional[str]
@@ -23,7 +23,7 @@ class VolumeInfo(BaseModel):
 
 class BookBase(BaseModel):
     id: str
-    volumeInfo: VolumeInfo
+    volumeInfo: VolumeInfo = None
 
 class BookCreate(BookBase):
     pass
