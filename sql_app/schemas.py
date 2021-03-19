@@ -20,16 +20,19 @@ class VolumeInfo(BaseModel):
     averageRating: Optional[float]
     ratingsCount: Optional[int]
     language: Optional[str]
+    is_read: Optional[bool]
 
+    class Config:
+        orm_mode = True
 class BookBase(BaseModel):
     id: str
-    volumeInfo: VolumeInfo = None
+    volumeInfo: Optional[VolumeInfo] = None
 
 class BookCreate(BookBase):
     pass
 
 class Book(BookBase):
-    # is_read: bool
+    
 
     class Config:
         orm_mode = True

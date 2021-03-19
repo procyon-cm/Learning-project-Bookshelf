@@ -43,13 +43,14 @@ class Book(Base):
     averageRating = Column(Float)
     ratingsCount = Column(Integer)
     language_id = Column(Integer, ForeignKey("language.id"))
+    is_read = Column(Boolean)
 
     authors = relationship("Author", secondary=book_author_table, back_populates="books")
     categories = relationship("Category", secondary=book_category_table, back_populates="books")
     publisher = relationship("Publisher", back_populates="books")
     print_type = relationship("PrintType", back_populates="books")
     language = relationship("Language", back_populates="books")
-    industry_identifiers = relationship("IndustryIdentifier", back_populates="book")
+    industry_identifiers = relationship("IndustryIdentifier", back_populates="book", cascade="all, delete-orphan")
 
 class Author(Base):
     __tablename__ = "author"
@@ -98,7 +99,7 @@ class IndustryIdentifier(Base):
     name = Column(String, ForeignKey("identifier_type.id"))
     book_id = Column(String, ForeignKey("book.id"))
     
-    book = relationship("Book", back_populates="industry_identifiers")
+    book = relationship("Book", back_populates="industry_identifiers", cascade_backrefs="all, delete-orphan")
     type = relationship("IdentifierType")
 
 class IdentifierType(Base):

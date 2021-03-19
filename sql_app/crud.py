@@ -2,34 +2,53 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from sql_app import models, schemas
+import json
 
 def get_book(db: Session, key_words: str, category: Optional[str] = None, author: Optional[str] = None):
     search = "%{}%".format(key_words, category, author)
     books = db.query.filter(models.Book.title.like(search)).limit(10).all()
     return books
 
+
+def get_all_books(db: Session, skip: int = 0, limit: int = 100):
+    books = db.query(models.Book).offset(skip).limit(limit).all()
+    
+    all_books = dict()
+    i = 1
+    for book in books:
+        dct_books = dict()
+        dct_books["id"] = book.id
+        dct_books["title"] = book.title
+        authors_list = list(map(lambda author: author.name, book.authors))
+        dct_books["authors"] = authors_list
+        all_books[i] = dct_books
+        i += 1
+    return all_books
+
+
 def get_book_from_db(db: Session, saved_book: models.Book):
     saved_book_dict = dict()
-    saved_book_dict["id"] = saved_book.id
-    saved_book_dict["title"] = saved_book.title
+    saved_book_dict["Id"] = saved_book.id
+    saved_book_dict["Title"] = saved_book.title
     
     authors_list = list(map(lambda author: author.name, saved_book.authors))
-    saved_book_dict["authors"] = authors_list
+    saved_book_dict["Authors"] = authors_list
 
-    saved_book_dict["publisher"] = saved_book.publisher
-    saved_book_dict["publishedDate"] = saved_book.publishedDate
+    saved_book_dict["Publisher"] = saved_book.publisher
+    saved_book_dict["Published Date"] = saved_book.publishedDate
     identifiers_list = list(map(lambda identifier: identifier.type.name, saved_book.industry_identifiers))
-    saved_book_dict["industry_identifiers"] = identifiers_list
+    saved_book_dict["Industry Identifiers"] = identifiers_list
 
-    saved_book_dict["pageCount"] = saved_book.pageCount
-    saved_book_dict["print_type"] = saved_book.print_type.name
+    saved_book_dict["Page Count"] = saved_book.pageCount
+    saved_book_dict["Print Type"] = saved_book.print_type.name
     
     category_list = list(map(lambda category: category.name, saved_book.categories))
-    saved_book_dict["categories"] = category_list
+    saved_book_dict["Categories"] = category_list
     
-    saved_book_dict["averageRating"] = saved_book.averageRating
-    saved_book_dict["ratingsCount"] = saved_book.ratingsCount
-    saved_book_dict["language"] = saved_book.language.name
+    saved_book_dict["Average Rating"] = saved_book.averageRating
+    saved_book_dict["Ratings Count"] = saved_book.ratingsCount
+    saved_book_dict["Language"] = saved_book.language.name
+    saved_book_dict["Is read"] = saved_book.is_read
     return saved_book_dict
 
 def get_saved_book_by_id(db: Session, id: str):
@@ -40,10 +59,21 @@ def get_saved_book_by_id(db: Session, id: str):
     except:
         return None
         
-
-def get_saved_books(db: Session, title: str, author: str, category: str):
+def delete_book_by_id(db: Session, id: str):
     try:
-        saved_books = None
+        saved_book = db.query(models.Book).filter(models.Book.id == id).one()   
+    except:
+        return None
+    
+    if saved_book:
+        db.delete(saved_book)
+        db.commit()
+      
+        return "Book successfully deleted."
+        
+def get_saved_books(db: Session, title: str, author: str, category: str, is_read: bool):
+    try:
+        saved_books = None 
 
         if title:
             search_title = "%{}%".format(title)
@@ -56,7 +86,9 @@ def get_saved_books(db: Session, title: str, author: str, category: str):
         if category != None:
             search_category = "%{}%".format(category)
             saved_books = saved_books.filter(models.Category.name.like(search_category))
-
+        if is_read != None:
+            saved_books = saved_books.filter(models.Book.is_read == is_read).all()
+            
         books = list(map(lambda book: get_book_from_db(db, book), saved_books))
         return books 
     except:
@@ -109,6 +141,7 @@ def create_and_store_industry_identifiers(book_id: models.Book.id, identifier_ty
         db.add(db_industry_identifier)
         db.commit()
         db.refresh(db_industry_identifier)
+
 
 def create_book(db: Session, book: schemas.BookCreate):
 
@@ -199,6 +232,7 @@ def create_book(db: Session, book: schemas.BookCreate):
     new_book["pageCount"] = book.volumeInfo.pageCount
     new_book["averageRating"] = book.volumeInfo.averageRating
     new_book["ratingsCount"] = book.volumeInfo.ratingsCount
+    new_book["is_read"] = book.volumeInfo.is_read
     
 
     new_book.update(foreign_id_dict)
